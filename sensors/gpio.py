@@ -1,3 +1,7 @@
+"""Test for reading GIO pin
+Use for capacitivw and inductive sensors
+"""
+
 import time
 import RPi.GPIO as GPIO
 
