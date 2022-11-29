@@ -86,6 +86,7 @@ def take_single_measurement():
 
 #Function to get, process and return the calibrated ROYGBV values
 def get_calibrated_values():
+	"""NIR channels (RSTUVW) wavelenghts: 610, 680, 730, 760, 810 and 860nm"""
 	#Wait for data to arrive into the data registers
 	#by checking the DATA_RDY bit of the Control Setup reg
 	#Return None if waiting for more than 10 seconds
@@ -108,28 +109,29 @@ def get_calibrated_values():
 		colour_bytes.append(read_reg(x))
 	
 	#Split the bytes by colour and place into colour specific lists 
-	v = [colour_bytes[0], colour_bytes[1], colour_bytes[2],\
+	r = [colour_bytes[0], colour_bytes[1], colour_bytes[2],\
  colour_bytes[3]]
-	b = [colour_bytes[4], colour_bytes[5], colour_bytes[6],\
+	s = [colour_bytes[4], colour_bytes[5], colour_bytes[6],\
  colour_bytes[7]]
-	g = [colour_bytes[8], colour_bytes[9], colour_bytes[10],\
+	t = [colour_bytes[8], colour_bytes[9], colour_bytes[10],\
  colour_bytes[11]]
-	y = [colour_bytes[12], colour_bytes[13], colour_bytes[14],\
+	u = [colour_bytes[12], colour_bytes[13], colour_bytes[14],\
  colour_bytes[15]]
-	o = [colour_bytes[16], colour_bytes[17], colour_bytes[18],\
+	v = [colour_bytes[16], colour_bytes[17], colour_bytes[18],\
  colour_bytes[19]]
-	r = [colour_bytes[20], colour_bytes[21], colour_bytes[22],\
+	w = [colour_bytes[20], colour_bytes[21], colour_bytes[22],\
  colour_bytes[23]]
 
 	#Convert the values from IEEE 754 standard floats to Python floats,
-	#place in calibrated_values list in the order [R,O,Y,G,B,V]
+	#place in calibrated_values list in the order [R,S,T,U,V,W]
+	# Added bytes to work with Python < 2.7
 	calibrated_values = []
-	calibrated_values.append(struct.unpack('>f', bytearray(r))[0])
-	calibrated_values.append(struct.unpack('>f', bytearray(o))[0])
-	calibrated_values.append(struct.unpack('>f', bytearray(y))[0])
-	calibrated_values.append(struct.unpack('>f', bytearray(g))[0])
-	calibrated_values.append(struct.unpack('>f', bytearray(b))[0])
-	calibrated_values.append(struct.unpack('>f', bytearray(v))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(r)))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(s)))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(t)))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(u)))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(v)))[0])
+	calibrated_values.append(struct.unpack('>f', bytes(bytearray(w)))[0])
 
 	return	calibrated_values
 
