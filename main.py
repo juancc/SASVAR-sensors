@@ -7,10 +7,15 @@ Run with sudo for NIR sensor
 
 JCA
 """
+import sys
+
 import os
 from datetime import datetime
 
 from sensors.AS7263 import take_single_measurement_with_led
+
+# input function have different behaviours in Python 2 and 3
+input_fn = input if sys.version_info[0] > 3 else raw_input
 
 SAVE_DIR = 'recordings'
 
@@ -24,7 +29,7 @@ def main():
     
     save_path = os.path.join(SAVE_DIR, timestamp+'.txt')
 
-    end = False if input('Press x to start') == 'x' else True
+    end = False if str(input_fn('Press x to start: ')) == 'x' else True
     if end : exit()
     print('Starting recording...')
     with open(save_path, "a") as f:
@@ -35,7 +40,7 @@ def main():
             x.insert(0, i)
             f.write(';'.join([str(j) for j in x]))
 
-            end = False if input('x to continue?') == x else True
+            end = False if input_fn('x to continue?') == x else True
             i+=1
     print('Total: {} records'.format(i))
 
