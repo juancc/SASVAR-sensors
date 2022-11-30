@@ -15,7 +15,9 @@ from sensors.AS7263 import take_single_measurement_with_led
 SAVE_DIR = 'recordings'
 
 def main():
-    os.makedirs(SAVE_DIR, exist_ok=True)
+    if not os.path.exists(SAVE_DIR): # Work with Python 2.7
+        os.makedirs(SAVE_DIR)
+
     # Creates text file for each session with datetime stamp as filename
     dateTimeObj = datetime.now()
     timestamp = dateTimeObj.strftime("%d-%b-%Y_%H-%M-%S.%f")
