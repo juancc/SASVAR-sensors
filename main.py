@@ -40,7 +40,7 @@ def main():
             x.insert(0, i)
             f.write(';'.join([str(j) for j in x]))
 
-            end = False if input_fn('x to continue?') == x else True
+            end = False if input_fn('Another? (Press x)') == 'x' else True
             i+=1
     print('Total: {} records'.format(i))
 
