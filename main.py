@@ -38,7 +38,7 @@ def main():
             x = take_single_measurement_with_led()
             print('NIR-{}: R:{}, S:{}, T:{}, U:{}, V:{}'.format(i, x[0],x[1],x[2],x[3],x[4]))
             x.insert(0, i)
-            f.write(';'.join([str(j) for j in x]))
+            f.write(';'.join([str(j) for j in x])+'\n')
 
             end = False if input_fn('Another? (Press x)') == 'x' else True
             i+=1
