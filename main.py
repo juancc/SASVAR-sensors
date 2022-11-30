@@ -29,7 +29,7 @@ def main():
     
     save_path = os.path.join(SAVE_DIR, timestamp+'.txt')
 
-    end = False if str(input_fn('Press x to start: ')) == 'x' else True
+    end = False if str(input_fn('Press Enter ')) == '' else True
     if end : exit()
     print('Starting recording...')
     with open(save_path, "a") as f:
@@ -40,7 +40,7 @@ def main():
             x.insert(0, i)
             f.write(';'.join([str(j) for j in x])+'\n')
 
-            end = False if input_fn('Another? (Press x)') == 'x' else True
+            end = False if input_fn('Another? (Press Enter)') == '' else True
             i+=1
     print('Total: {} records'.format(i))
 
