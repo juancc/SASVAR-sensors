@@ -32,10 +32,10 @@ def main():
             print('NIR-{}: R:{}, S:{}, T:{}, U:{}, V:{}'.format(i, x[0],x[1],x[2],x[3],x[4]))
             x.insert(0, i)
             f.write(';'.join([str(j) for j in x]))
+
             end = False if input('x to continue?') == x else True
-
             i+=1
-
+    print('Total: {} records'.format(i))
 
 
 
