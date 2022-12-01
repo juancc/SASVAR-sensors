@@ -1,9 +1,10 @@
 """
+NIR Recorder
 Run with sudo for NIR sensor
 
 - Each measure is saved in the file with a unique id
 - Id are progressive integers on the first data stored
-- NIR data is stored: id;R;S;T;U;V on each line of the text file
+- NIR data is stored: id;R;S;T;U;V,W on each line of the text file
 
 JCA
 """
