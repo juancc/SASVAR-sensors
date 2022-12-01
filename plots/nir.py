@@ -34,11 +34,11 @@ def distance_plot():
 
     def product_plot(ax, values, color, label):
         """Plot 3 observations of the same produc"""
-        colors = ['red', 'blue', 'green']
+        colors = ['red', 'yellow', 'blue']
         labels = ['2cm', '4cm', '6cm']
         for i in range(3):
-            ax.bar(CHANNELS, values[i], color=colors[i], alpha=0.2, linewidth=0, width=1.0)
-            # Mean
+            ax.bar(CHANNELS, values[i], color=colors[i], alpha=0.2, linewidth=0, width=1.0, zorder=-i)
+            # Max
             if i==0: ax.plot(CHANNELS, values[i], '.-', c=color, linewidth=1, label=label)
     
     products = {
@@ -49,7 +49,9 @@ def distance_plot():
         4:	'Oreo'
     }
 
-    lines = read_file(filepath)
+    lines = np.array(read_file(filepath))
+    lines = (lines-np.mean(lines, axis=0)) / np.std(lines, axis=0)
+
     fig, ax = plt.subplots()
 
     i=0
@@ -62,7 +64,7 @@ def distance_plot():
     prod_is = 0
     for l in lines:
         i += 1
-        obs = l * scale
+        obs = l #+ abs(np.min(l))#* scale
         prod.append(obs)
         if i%3==0:
             product_plot(ax, prod, colors[prod_n], products[prod_n])
@@ -91,6 +93,21 @@ def pca_reduction(data, ax=3):
     return np.dot(x, projection_matrix)
 
 
+def same_product():
+    """Plot measures of the same product on different positions"""
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/oreo-positions.txt'
+    x = np.array(read_file(filepath))
+    # x = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
+
+    fig, ax = plt.subplots()
+
+    for row in x:
+        ax.plot(CHANNELS, row, '.--', c='black', linewidth=1)
+
+    std = np.std(x, axis=0)
+    ax.bar(CHANNELS, std, color=['crimson', 'orange', 'gold', 'chartreuse', 'springgreen', 'aquamarine'], linewidth=0, width=1.0)
+    # plt.legend()
+    plt.show()
 
 def dataset_plot():
     """Plot all the data in the 6 bands"""
@@ -129,8 +146,8 @@ def dataset_plot():
 
 def main():
     # distance_plot()
-    dataset_plot()
-
+    # dataset_plot()
+    same_product()
 
 
 if __name__ == '__main__': main()
