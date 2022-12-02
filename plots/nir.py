@@ -143,11 +143,50 @@ def dataset_plot():
     plt.show()
 
 
+def lights():
+    """Measument with ambient light vs dark. The first 5 lines are with light"""
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/lights.txt'
+    x = np.array(read_file(filepath))
+
+    products = {
+        0:	'Coca-Cola Lata',
+        1:	'Botella Cristal',
+        2:	'Vaso Nikkei',
+        3:	'Yogurt Griego',
+        4:	'Oreo'
+    }
+
+    light_on = x[:5,:]
+    light_off = x[5:,:]
+    diff = abs(light_off-light_on)
+
+    fig, ax = plt.subplots()
+    colors = ['aqua', 'yellow', 'black', 'lime', 'dodgerblue']
+    i=0
+    # Scale factor for channel
+    s = 20
+    scale = np.array([1,5,s,s,s,s])
+    for on,off in zip(light_on, light_off):
+        on *= scale
+        off *= scale
+        ax.plot(CHANNELS, on, '.-', c='black')
+        ax.plot(CHANNELS, off, '.--', c='black')
+        ax.fill_between(CHANNELS, off, on, color=colors[i],
+                 alpha=0.5)
+        i+=1
+
+    markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
+    plt.legend(markers, products.values(), numpoints=1)
+
+    plt.show()
+
+
 
 def main():
     # distance_plot()
     # dataset_plot()
-    same_product()
+    # same_product()
+    lights()
 
 
 if __name__ == '__main__': main()
