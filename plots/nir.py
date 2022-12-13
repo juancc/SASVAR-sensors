@@ -76,6 +76,61 @@ def distance_plot():
     plt.show()
 
 
+def case_vs_dark():
+    """Plot distance plots in dark room vs same products with case
+    File structure:
+    (For product)
+    1 meassure with case
+    2 meassure in dark room
+    """
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/with_case/case_test-products.txt'
+
+    def product_plot(ax, values, color, label):
+        """Plot 2 observations of the same produc"""
+        line_style=['-', '--']
+        for i in range(2):
+            ax.plot(CHANNELS, values[i], line_style[i], color=color)
+        ax.fill_between(CHANNELS,  values[0],  values[1], color=color,
+                 alpha=0.3, label=label)
+    
+    products = {
+        0:	'Coca-Cola Lata',
+        1:	'Botella Cristal',
+        2:	'Vaso Nikkei',
+        3:	'Yogurt Griego',
+        4:	'Oreo'
+    }
+
+    lines = np.array(read_file(filepath))
+    # lines = (lines-np.mean(lines, axis=0)) / np.std(lines, axis=0)
+    fig, ax = plt.subplots()
+
+    i=0
+    prod = [] # Three measures of the same product
+    colors = ['aqua', 'yellow', 'black', 'lime', 'dodgerblue']
+    prod_n = 0 # Id of the product
+    # Scale factor 
+    s = 20
+    scale = np.array([1,5,s,s,s,s])
+    prod_is = 0
+    for l in lines:
+        i += 1
+        obs = l * scale
+        prod.append(obs)
+        if i%2==0:
+            product_plot(ax, prod, colors[prod_n], products[prod_n])
+            i=0
+            prod = []
+            prod_n += 1
+    
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
 def pca_reduction(data, ax=3):
     """Principal Component Analysis. return data reduced to ax dimensions"""
     x = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
@@ -108,6 +163,26 @@ def same_product():
     ax.bar(CHANNELS, std, color=['crimson', 'orange', 'gold', 'chartreuse', 'springgreen', 'aquamarine'], linewidth=0, width=1.0)
     # plt.legend()
     plt.show()
+
+def same_product_case():
+    """Same product different positions and with case vs dark room"""
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/oreo-positions.txt'
+    x_dark = np.array(read_file(filepath))
+
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/with_case/oreo_positions_case.txt'
+    x_case = np.array(read_file(filepath))
+
+    fig, ax = plt.subplots()
+
+    # Scale factor 
+    s = 20
+    scale = np.array([1,5,s,s,s,s])
+
+    for row in x_dark: ax.plot(CHANNELS, row*scale, '.--', c='black', linewidth=1)
+    for row in x_case: ax.plot(CHANNELS, row*scale, '.--', c='red', linewidth=1)
+    plt.show()
+
+
 
 def dataset_plot():
     """Plot all the data in the 6 bands"""
@@ -186,7 +261,9 @@ def main():
     # distance_plot()
     # dataset_plot()
     # same_product()
-    lights()
-
+    # lights()
+    # case_vs_dark()
+    same_product_case()
+    
 
 if __name__ == '__main__': main()

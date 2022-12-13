@@ -30,7 +30,7 @@ def main():
     
     save_path = os.path.join(SAVE_DIR, timestamp+'.txt')
 
-    end = False if str(input_fn('Press Enter ')) == '' else True
+    end = False if str(input_fn('Press Enter to start')) == '' else True
     if end : exit()
     print('Starting recording...')
     with open(save_path, "a") as f:
