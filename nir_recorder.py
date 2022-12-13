@@ -28,16 +28,19 @@ def main():
     dateTimeObj = datetime.now()
     timestamp = dateTimeObj.strftime("%d-%b-%Y_%H-%M-%S.%f")
     
-    save_path = os.path.join(SAVE_DIR, timestamp+'.txt')
 
-    end = False if str(input_fn('Press Enter to start')) == '' else True
-    if end : exit()
+    # end = False if str(input_fn('Press Enter to start')) == '' else True
+    filename = str(input_fn('Enter filename: '))
+    save_path = os.path.join(SAVE_DIR, filename+'_'+timestamp+'.txt')
+
+    # if end : exit()
     print('Starting recording...')
+    end = False
     with open(save_path, "a") as f:
         i=0
         while not end:
             x = take_single_measurement_with_led()
-            print('NIR-{}: R:{}, S:{}, T:{}, U:{}, V:{}'.format(i, x[0],x[1],x[2],x[3],x[4]))
+            print('NIR-{}: R:{}, S:{}, T:{}, U:{}, V:{}, W{}'.format(i, x[0],x[1],x[2],x[3],x[4],x[5]))
             x.insert(0, i)
             f.write(';'.join([str(j) for j in x])+'\n')
 
