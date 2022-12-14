@@ -11,6 +11,7 @@ JCA
 import matplotlib.pyplot as plt
 import numpy as np
 
+import os
 
 CHANNELS = ['R','S','T','U','V','W']
 
@@ -128,9 +129,6 @@ def case_vs_dark():
 
 
 
-
-
-
 def pca_reduction(data, ax=3):
     """Principal Component Analysis. return data reduced to ax dimensions"""
     x = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
@@ -184,8 +182,8 @@ def same_product_case():
 
 
 
-def dataset_plot():
-    """Plot all the data in the 6 bands"""
+def dataset_plot_one():
+    """Plot all the data in the 6 bands. One measure by product on dark room"""
     filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/products.txt'
     data = np.array(read_file(filepath))
 
@@ -216,6 +214,62 @@ def dataset_plot():
     markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
     plt.legend(markers, materials.values(), numpoints=1)
     plt.show()
+
+
+def dataset_plot():
+    """Dataset test plot with case and dark room. Each product is measure 5 times in different positions. 
+        Each file contains 5 measures of the product. The filename starts with the ID of the product"""
+    # Materials
+    colors = ['orangered', 'darkorange', 'darkolivegreen', 'dodgerblue', 'darkblue', 'crimson']
+    materials={
+        0:'plastic',
+        1:'paper',
+        2:'other',
+        3:'glass',
+        4:'metal',
+        5:'organic'
+    }
+    material_filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/products_material.txt'
+    with open(material_filepath, 'r') as f:
+        mats = f.readlines()
+    mats = [int(m) for m in mats]
+    
+    filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/with_case/dataset-test'
+    dataset_mats = [] # List of each observation material
+    data = []
+    for f in os.listdir(filepath):
+        filename = os.path.join(filepath, f)
+        m = mats[int(f.split('_')[0])]
+        dataset_mats += [m for i in range(5)]
+        obs = read_file(filename)
+        data += obs 
+    data = np.array(data)
+
+    # SCATTER PLOT
+    # Plot each observation with a material-color correspondence
+    cols = [colors[m] for m in dataset_mats]
+    x = pca_reduction(data)
+    fig, ax = plt.subplots()
+    # ax = fig.add_subplot(projection='3d')
+    # ax.scatter(x[:,0],x[:,1],x[:,2], c=cols, s=15)
+    
+    ax.scatter(x[:,0],x[:,1], c=cols, s=4)
+
+    markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
+    plt.legend(markers, materials.values(), numpoints=1)
+    plt.title('Dataset-test 2D')
+    plt.show()
+
+    # CHANNEL PLOT
+    data_norm = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
+    fig, ax = plt.subplots()
+    i=0
+    for row in data_norm: 
+        ax.plot(CHANNELS, row, '.', c=cols[i], markersize=5, alpha=0.2)
+        i+=1
+
+    plt.show()
+
 
 
 def lights():
@@ -254,16 +308,18 @@ def lights():
     plt.legend(markers, products.values(), numpoints=1)
 
     plt.show()
+    
 
 
 
 def main():
     # distance_plot()
-    # dataset_plot()
+    # dataset_plot_one()
     # same_product()
     # lights()
     # case_vs_dark()
-    same_product_case()
+    # same_product_case()
+    dataset_plot()
     
 
 if __name__ == '__main__': main()
