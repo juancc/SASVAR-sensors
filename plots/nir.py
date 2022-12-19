@@ -8,24 +8,16 @@ Bands: 610, 680, 730, 760, 810 and 860nm
 
 JCA
 """
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-import os
+from auxfunc import pca_reduction, convex_hull, read_file
+
 
 CHANNELS = ['R','S','T','U','V','W']
 
-def read_file(filepath):
-    """Read file and return a list of arrays. Each row is a product with
-    6 values corresponding to each NIR channel"""
-    with open(filepath, 'r') as f:
-        lines = f.readlines()
-
-    lines = [l.strip().split(';')[1:] for l in lines]
-    data = []
-    for l in lines:
-        data.append(np.array([float(i) for i in l]))
-    return data
 
 def distance_plot():
     """Plot Products at different distances from NIR sensor
@@ -35,10 +27,10 @@ def distance_plot():
 
     def product_plot(ax, values, color, label):
         """Plot 3 observations of the same produc"""
-        colors = ['red', 'yellow', 'blue']
+        colors = ['red', 'deepskyblue', 'darkblue']
         labels = ['2cm', '4cm', '6cm']
         for i in range(3):
-            ax.bar(CHANNELS, values[i], color=colors[i], alpha=0.2, linewidth=0, width=1.0, zorder=-i)
+            ax.bar(CHANNELS, values[i], color=colors[i], alpha=0.2, linewidth=0, width=1.0, zorder=i)
             # Max
             if i==0: ax.plot(CHANNELS, values[i], '.-', c=color, linewidth=1, label=label)
     
@@ -51,7 +43,7 @@ def distance_plot():
     }
 
     lines = np.array(read_file(filepath))
-    lines = (lines-np.mean(lines, axis=0)) / np.std(lines, axis=0)
+    # lines = (lines-np.mean(lines, axis=0)) / np.std(lines, axis=0)
 
     fig, ax = plt.subplots()
 
@@ -65,7 +57,7 @@ def distance_plot():
     prod_is = 0
     for l in lines:
         i += 1
-        obs = l #+ abs(np.min(l))#* scale
+        obs = l * scale #+ abs(np.min(l))#
         prod.append(obs)
         if i%3==0:
             product_plot(ax, prod, colors[prod_n], products[prod_n])
@@ -128,24 +120,6 @@ def case_vs_dark():
     plt.show()
 
 
-
-def pca_reduction(data, ax=3):
-    """Principal Component Analysis. return data reduced to ax dimensions"""
-    x = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
-    z = np.dot(x.T, x) # Covariance matrix
-    eigenvalues, eigenvectors = np.linalg.eig(z)
-
-    variance_explained = []
-    for i in eigenvalues:
-        variance_explained.append((i/sum(eigenvalues))*100)
-            
-    print(f'Variance Explained: {variance_explained}')
-
-    projection_matrix = (eigenvectors.T[:][:ax]).T
-
-    return np.dot(x, projection_matrix)
-
-
 def same_product():
     """Plot measures of the same product on different positions"""
     filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/oreo-positions.txt'
@@ -161,6 +135,7 @@ def same_product():
     ax.bar(CHANNELS, std, color=['crimson', 'orange', 'gold', 'chartreuse', 'springgreen', 'aquamarine'], linewidth=0, width=1.0)
     # plt.legend()
     plt.show()
+
 
 def same_product_case():
     """Same product different positions and with case vs dark room"""
@@ -179,7 +154,6 @@ def same_product_case():
     for row in x_dark: ax.plot(CHANNELS, row*scale, '.--', c='black', linewidth=1)
     for row in x_case: ax.plot(CHANNELS, row*scale, '.--', c='red', linewidth=1)
     plt.show()
-
 
 
 def dataset_plot_one():
@@ -216,23 +190,62 @@ def dataset_plot_one():
     plt.show()
 
 
-def dataset_plot():
+def dataset_plot(plot):
     """Dataset test plot with case and dark room. Each product is measure 5 times in different positions. 
-        Each file contains 5 measures of the product. The filename starts with the ID of the product"""
+        Each file contains 5 measures of the product. The filename starts with the ID of the product
+        :param plot: (String) type of plot to make:
+            - scatter
+            - channel
+            - submaterials
+            - scatter-no-plastic
+    """
+    src_plot = plot
     # Materials
-    colors = ['orangered', 'darkorange', 'darkolivegreen', 'dodgerblue', 'darkblue', 'crimson']
+    colors = ['fuchsia', 'darkorange', 'darkolivegreen', 'dodgerblue', 'darkblue', 'crimson']
+
     materials={
         0:'plastic',
         1:'paper',
         2:'other',
         3:'glass',
         4:'metal',
-        5:'organic'
+        # 5:'organic'
     }
     material_filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/products_material.txt'
     with open(material_filepath, 'r') as f:
         mats = f.readlines()
     mats = [int(m) for m in mats]
+
+
+    # SCATTER PLOT OF SUBMATERIALS
+    title = None
+    if plot == 'submaterials':
+        title = 'Dataset Sub-materials - PCA'
+        
+        colors = ['fuchsia', 'darkorange', 'darkolivegreen', 'dodgerblue', 'darkblue', 'crimson', 'blue', 'red', 'green', 'cyan', 'black', 'slategray']
+
+        materials = {
+            0: 'plastic',
+            1: 'other-plastic',
+            2: 'PE',
+            3: 'PS',
+            4: 'PP',
+            5: 'paper',
+            6: 'other',
+            7: 'glass',
+            8: 'steel',
+            9: 'copper',
+            10: 'aluminum',
+            11: 'organic'
+
+        }
+        material_filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/submaterials_id.txt'
+        with open(material_filepath, 'r') as f:
+            mats = f.readlines()
+        mats = [int(m) for m in mats]
+
+        plot = 'scatter'
+
     
     filepath = '/Users/juanca/Library/Mobile Documents/com~apple~CloudDocs/Projects/Sasvar/Dataset/Sensors/NIR/recordings/with_case/dataset-test'
     dataset_mats = [] # List of each observation material
@@ -240,37 +253,92 @@ def dataset_plot():
     for f in os.listdir(filepath):
         filename = os.path.join(filepath, f)
         m = mats[int(f.split('_')[0])]
+        
+        # SCATTER WITHOUT PLASTICS
+        if plot == 'scatter-no-plastic' and m==0:
+            continue
+
         dataset_mats += [m for i in range(5)]
         obs = read_file(filename)
         data += obs 
     data = np.array(data)
+    cols = [colors[m] for m in dataset_mats]
+
+    # SCATTER WITHOUT PLASTICS
+    if plot == 'scatter-no-plastic': plot = 'scatter'
+
+
 
     # SCATTER PLOT
-    # Plot each observation with a material-color correspondence
-    cols = [colors[m] for m in dataset_mats]
-    x = pca_reduction(data)
-    fig, ax = plt.subplots()
-    # ax = fig.add_subplot(projection='3d')
-    # ax.scatter(x[:,0],x[:,1],x[:,2], c=cols, s=15)
-    
-    ax.scatter(x[:,0],x[:,1], c=cols, s=4)
+    if plot == 'scatter':
+        title = 'Dataset Materials - PCA' if not title else title
+        fig, ax = plt.subplots()
 
-    markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
-    plt.legend(markers, materials.values(), numpoints=1)
-    plt.title('Dataset-test 2D')
-    plt.show()
+        # Plot each observation with a material-color correspondence
+        x = pca_reduction(data)
+
+        # Calculate Convex hull 
+        if src_plot != 'submaterials':
+            x_ = np.array([x[:,0],x[:,1]]).T
+            obs_mat = get_obs_by_mat(dataset_mats, x_, no_mats=len(materials))
+
+            for m, obs in obs_mat.items():
+                try:
+                    hull = convex_hull(obs.T)
+                    ax.fill(hull[:,0], hull[:,1], color=colors[m], alpha=0.2)
+                except AssertionError:
+                    print('Not enough points')
+        
+        ax.scatter(x[:,0],x[:,1], c=cols, s=4)
+
+        markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
+        plt.legend(markers, materials.values(), numpoints=1)
+        plt.title(title)
+        plt.show()
 
     # CHANNEL PLOT
-    data_norm = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
-    fig, ax = plt.subplots()
-    i=0
-    for row in data_norm: 
-        ax.plot(CHANNELS, row, '.', c=cols[i], markersize=5, alpha=0.2)
-        i+=1
+    if plot == 'channel':
+        fig, ax = plt.subplots()
+        data_norm = (data-np.mean(data, axis=0)) / np.std(data, axis=0)
+        
+        obs_mat = get_obs_by_mat(dataset_mats, data_norm, no_mats=len(materials))
+        
+        # Set material channels in a list
+        for mat, obs in obs_mat.items():
+            channels = [column for column in obs.T]
+            violin_parts = ax.violinplot(channels)
+            for pc in violin_parts['bodies']:
+                pc.set_facecolor(colors[mat])
+                pc.set_alpha(0.2)
+                # pc.set_edgecolor(colors[mat])
+            violin_parts['cmaxes'].set_color(colors[mat])
+            violin_parts['cmaxes'].set_linewidth(1)
 
-    plt.show()
+            violin_parts['cmins'].set_color(colors[mat])
+            violin_parts['cmins'].set_linewidth(1)
+
+            violin_parts['cbars'].set_color(colors[mat])
+            violin_parts['cbars'].set_linewidth(1)
+
+        
+        markers = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colors]
+        plt.legend(markers, materials.values(), numpoints=1)
+        plt.title('Materials Distribution by Channel')
+        plt.show()
 
 
+def get_obs_by_mat(dataset_mats, data_norm, no_mats=5):
+    """Return observations by material {mat: obs}"""
+        # append the index of the observation by material idx
+    obs_idx_mat = {i:[] for i in range(no_mats)}
+    for i, j in enumerate(dataset_mats): obs_idx_mat[j].append(i)
+    
+    # Get observations by material
+    # Append observations to a dict to its corresponding material idx
+    obs_mat = {}
+    for i in range(no_mats):
+        obs_mat[i] = np.take(data_norm, obs_idx_mat[i], axis=0)
+    return obs_mat
 
 def lights():
     """Measument with ambient light vs dark. The first 5 lines are with light"""
@@ -311,15 +379,20 @@ def lights():
     
 
 
-
 def main():
+    ## Plots with dark room
     # distance_plot()
     # dataset_plot_one()
     # same_product()
     # lights()
+
+    ## Plots with case
     # case_vs_dark()
     # same_product_case()
-    dataset_plot()
+    dataset_plot('scatter')
+    # dataset_plot('submaterials')
+    # dataset_plot('scatter-no-plastic')
+    # dataset_plot('channel')
     
 
 if __name__ == '__main__': main()
