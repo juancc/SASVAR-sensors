@@ -1,6 +1,14 @@
 """Test Walabot device
 Hello Walabot from https://github.com/Walabot-Projects/Walabot-HelloWalabot
 
+To setup Walabot on Ubuntu:
+- Install SDK from webpage
+- sudo nano /etc/ld.so.conf.d/walabot-sdk.conf And add:  /usr/lib/walabot
+- sudo ldconfig
+- walabot-diagnose should now launch ok (you may need to run in a new terminal or reboot first):
+- pip install WalabotAPI --no-index --find-links="/usr/share/walabot/python/"
+
+
 JCA
 """
 
